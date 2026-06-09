@@ -6,89 +6,96 @@
 <title>Lucky Tea Challenge ☕</title>
 
 <style>
-body{
+*{
     margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
     min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:linear-gradient(135deg,#ffdce3,#ffeccf);
+    background:linear-gradient(135deg,#ffd6e0,#ffe8c8);
     font-family:Arial,sans-serif;
+    padding:20px;
 }
 
 .container{
     background:white;
-    width:90%;
-    max-width:700px;
-    border-radius:25px;
+    width:100%;
+    max-width:750px;
+    border-radius:30px;
     padding:35px;
     text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    box-shadow:0 15px 35px rgba(0,0,0,0.15);
 }
 
 h1{
-    margin-top:0;
-    font-size:36px;
+    font-size:38px;
+    margin-bottom:10px;
 }
 
 .subtitle{
-    font-size:18px;
     color:#666;
-    margin-bottom:20px;
+    font-size:18px;
+    margin-bottom:25px;
 }
 
 .score-board{
-    background:#fff5f7;
-    border-radius:15px;
-    padding:15px;
+    background:#fff4f7;
+    border-radius:20px;
+    padding:18px;
     margin-bottom:25px;
-    font-size:22px;
+    font-size:26px;
     font-weight:bold;
 }
 
 .cups{
     display:grid;
     grid-template-columns:repeat(5,1fr);
-    gap:18px;
+    gap:20px;
     justify-items:center;
 }
 
 .cup{
     font-size:60px;
     cursor:pointer;
-    transition:0.2s ease;
+    transition:0.25s ease;
     user-select:none;
 }
 
 .cup:hover{
-    transform:scale(1.15) rotate(-5deg);
+    transform:scale(1.2) rotate(-8deg);
 }
 
 .correct{
-    font-size:45px;
+    font-size:38px;
 }
 
 .wrong{
-    font-size:30px;
+    font-size:24px;
 }
 
 #status{
     margin-top:25px;
+    min-height:60px;
     font-size:22px;
-    min-height:50px;
     font-weight:bold;
 }
 
 button{
     margin-top:20px;
-    background:#ff7b9c;
     border:none;
+    background:#ff7da2;
     color:white;
-    padding:12px 25px;
-    border-radius:12px;
+    padding:14px 30px;
+    border-radius:14px;
     font-size:18px;
     cursor:pointer;
     display:none;
+    transition:0.2s;
 }
 
 button:hover{
@@ -96,12 +103,17 @@ button:hover{
 }
 
 @media(max-width:600px){
+
+    h1{
+        font-size:30px;
+    }
+
     .cup{
         font-size:50px;
     }
 
-    h1{
-        font-size:30px;
+    .score-board{
+        font-size:22px;
     }
 }
 </style>
@@ -112,20 +124,23 @@ button:hover{
 <div class="container">
 
     <h1>☕ Lucky Tea Challenge</h1>
+
     <p class="subtitle">
-        You have <b>10 chances</b> to find the lucky cup 😏
+        You have <b>10 chances</b> 😏<br>
+        Can you find the lucky tea cups?
     </p>
 
     <div class="score-board">
-        🏆 Wins: <span id="wins">0</span> /
-        🎯 Guesses: <span id="guesses">0</span>
+        🏆 Score:
+        <span id="wins">0</span> /
+        <span id="guesses">0</span>
     </div>
 
     <div class="cups" id="cupsContainer"></div>
 
     <div id="status"></div>
 
-    <button onclick="restartGame()" id="restartBtn">
+    <button id="restartBtn" onclick="restartGame()">
         Play Again 🔄
     </button>
 
@@ -139,10 +154,10 @@ const MAX_GUESSES = 10;
 let wins = 0;
 let guesses = 0;
 
-const statusDiv = document.getElementById("status");
 const winsText = document.getElementById("wins");
 const guessesText = document.getElementById("guesses");
-const container = document.getElementById("cupsContainer");
+const statusDiv = document.getElementById("status");
+const cupsContainer = document.getElementById("cupsContainer");
 
 function generateLuckyCup(){
     return Math.floor(Math.random() * TOTAL_CUPS) + 1;
@@ -151,21 +166,26 @@ function generateLuckyCup(){
 let luckyCup = generateLuckyCup();
 
 function createCups(){
-    container.innerHTML = "";
 
-    for(let i=1;i<=TOTAL_CUPS;i++){
+    cupsContainer.innerHTML = "";
+
+    for(let i = 1; i <= TOTAL_CUPS; i++){
+
         const cup = document.createElement("div");
         cup.className = "cup";
         cup.innerHTML = "☕";
+
         cup.onclick = () => pickCup(i);
 
-        container.appendChild(cup);
+        cupsContainer.appendChild(cup);
     }
 }
 
 async function pickCup(cupNumber){
 
-    if(guesses >= MAX_GUESSES) return;
+    if(guesses >= MAX_GUESSES){
+        return;
+    }
 
     guesses++;
     guessesText.textContent = guesses;
@@ -178,48 +198,54 @@ async function pickCup(cupNumber){
         winsText.textContent = wins;
 
         statusDiv.innerHTML =
-        "😳 WAIT WHAT?! You actually won 😂 Okay okay... I owe you tea ☕";
+        "😳 WAIT WHAT?! You actually won 😂 I owe you tea ☕";
 
-        cups[cupNumber-1].innerHTML =
+        cups[cupNumber - 1].innerHTML =
         '<span class="correct">🏆</span>';
-
-        // SEND EMAIL ONLY IF WIN
-        try{
-            await fetch("https://formspree.io/f/mlgkeyna",{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
-                    game:"Lucky Tea Challenge",
-                    result:"WIN",
-                    wins:wins,
-                    guesses:guesses,
-                    luckyCup:luckyCup,
-                    time:new Date().toLocaleString()
-                })
-            });
-        }catch(err){
-            console.log(err);
-        }
 
     }else{
 
         statusDiv.innerHTML =
-        `😂 Nope! Wrong cup.<br>Lucky cup was #${luckyCup}`;
+        `😂 Nope! Wrong cup.<br>Lucky cup was Cup #${luckyCup}`;
 
-        cups[cupNumber-1].innerHTML =
+        cups[cupNumber - 1].innerHTML =
         '<span class="wrong">❌</span>';
 
-        cups[luckyCup-1].innerHTML =
+        cups[luckyCup - 1].innerHTML =
         '<span class="correct">🏆</span>';
     }
 
-    // stop after 10 guesses
+    // END GAME AFTER 10 GUESSES
     if(guesses >= MAX_GUESSES){
 
         statusDiv.innerHTML +=
         `<br><br>🎮 Game Over! Final Score: ${wins}/${guesses}`;
+
+        // SEND ONLY ONE EMAIL
+        // ONLY IF THEY WON AT LEAST ONCE
+        if(wins >= 1){
+
+            try{
+
+                await fetch("https://formspree.io/f/mlgkeyna",{
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({
+                        game:"Lucky Tea Challenge",
+                        totalWins:wins,
+                        totalGuesses:guesses,
+                        finalScore:`${wins}/${guesses}`,
+                        result:"Won At Least Once",
+                        time:new Date().toLocaleString()
+                    })
+                });
+
+            }catch(err){
+                console.log(err);
+            }
+        }
 
         document.getElementById("restartBtn")
         .style.display = "inline-block";
@@ -227,14 +253,17 @@ async function pickCup(cupNumber){
         return;
     }
 
-    // new round after 1.5 sec
-    setTimeout(()=>{
+    // NEXT ROUND
+    setTimeout(() => {
+
         createCups();
         luckyCup = generateLuckyCup();
+
     },1500);
 }
 
 function restartGame(){
+
     wins = 0;
     guesses = 0;
 
