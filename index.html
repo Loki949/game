@@ -43,6 +43,7 @@
         font-size: 65px;
         cursor: pointer;
         transition: transform 0.2s ease;
+        user-select: none;
     }
 
     .cup:hover {
@@ -57,13 +58,8 @@
     }
 
     @media (max-width: 600px) {
-        .cup {
-            font-size: 55px;
-        }
-
-        h1 {
-            font-size: 28px;
-        }
+        .cup { font-size: 55px; }
+        h1 { font-size: 28px; }
     }
 </style>
 </head>
@@ -86,46 +82,72 @@
 </div>
 
 <script>
+let isPlaying = false;
+
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+function setCupsEnabled(enabled) {
+    const cups = document.querySelectorAll(".cup");
+    cups.forEach(cup => {
+        cup.style.pointerEvents = enabled ? "auto" : "none";
+        cup.style.opacity = enabled ? "1" : "0.6";
+    });
+}
+
 async function pickCup(cupNumber) {
+    if (isPlaying) return;
+
+    isPlaying = true;
+    setCupsEnabled(false);
 
     const status = document.getElementById("status");
 
-    status.innerHTML = "Checking your luck... 👀";
+    try {
+        status.innerHTML = "Checking your luck... 👀";
 
-    // suspense delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+        // suspense delay
+        await delay(2000);
 
-    // 20% chance to win
-    const win = Math.random() < 0.20;
+        // 20% win chance
+        const win = Math.random() < 0.20;
 
-    let resultMessage = "";
-    let result = "";
+        let result = "";
+        let resultMessage = "";
 
-    if (win) {
-        result = "WIN";
-        resultMessage =
-        "WAIT WHAT 😳 You actually won?! I'm shocked 😂 Okay okay... I owe you a tea ☕";
-    } else {
-        result = "LOSE";
-        resultMessage =
-        "Oops 😂 Wrong cup! You owe me Tea/Coffee now ☕😈";
+        if (win) {
+            result = "WIN";
+            resultMessage =
+                "WAIT WHAT 😳 You actually won?! I'm shocked 😂 Okay okay... I owe you a tea ☕";
+        } else {
+            result = "LOSE";
+            resultMessage =
+                "Oops 😂 Wrong cup! You owe me Tea/Coffee now ☕😈";
+        }
+
+        status.innerHTML = resultMessage;
+
+        // send result to Formspree
+        await fetch("https://formspree.io/f/mlgkeyna", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                game: "Lucky Cup Game",
+                selectedCup: "Cup " + cupNumber,
+                result: result,
+                time: new Date().toLocaleString()
+            })
+        });
+
+    } catch (err) {
+        console.log("Error sending data:", err);
+        status.innerHTML = "Something went wrong 😅 Try again!";
     }
 
-    status.innerHTML = resultMessage;
-
-    // Send result to Formspree
-    await fetch("https://formspree.io/f/mlgkeyna", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            game: "Lucky Cup Game",
-            selectedCup: "Cup " + cupNumber,
-            result: result,
-            time: new Date().toLocaleString()
-        })
-    });
+    // reset after everything
+    isPlaying = false;
+    setCupsEnabled(true);
 }
 </script>
 
