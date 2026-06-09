@@ -126,7 +126,7 @@ button:hover{
     <h1>☕ Lucky Tea Challenge</h1>
 
     <p class="subtitle">
-        You have <b>10 chances</b> 😏<br>
+        You have <b>5 chances</b> 😏<br>
         Can you find the lucky tea cups?
     </p>
 
@@ -149,7 +149,7 @@ button:hover{
 <script>
 
 const TOTAL_CUPS = 10;
-const MAX_GUESSES = 10;
+const MAX_GUESSES = 5;
 
 let wins = 0;
 let guesses = 0;
@@ -206,7 +206,7 @@ async function pickCup(cupNumber){
         winsText.textContent = wins;
 
         statusDiv.innerHTML =
-        "😳 WAIT WHAT?! You actually won 😂 I owe you tea ☕";
+        " You actually won 😂 I owe you tea ☕";
 
         cups[cupNumber - 1].innerHTML =
         '<span class="correct">🏆</span>';
@@ -214,7 +214,7 @@ async function pickCup(cupNumber){
     }else{
 
         statusDiv.innerHTML =
-        `😂 Nope! Wrong cup.<br>Lucky cup was Cup #${luckyCup}`;
+        `😂 Nope! Wrong cup ;
 
         cups[cupNumber - 1].innerHTML =
         '<span class="wrong">❌</span>';
@@ -234,7 +234,7 @@ async function pickCup(cupNumber){
 
             try{
 
-                await fetch("https://formspree.io/f/mlgkeyna",{
+                await fetch("https://formspree.io/f/xnjyzalw",{
                     method:"POST",
                     headers:{
                         "Content-Type":"application/json"
