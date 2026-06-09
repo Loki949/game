@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lucky Tea Challenge ☕</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #ffe6eb;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    .container {
+        text-align: center;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 34px;
+        margin-bottom: 10px;
+    }
+
+    p {
+        font-size: 18px;
+        margin-bottom: 30px;
+    }
+
+    .cups {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .cup {
+        font-size: 65px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .cup:hover {
+        transform: scale(1.15) rotate(-5deg);
+    }
+
+    #status {
+        margin-top: 30px;
+        font-size: 24px;
+        font-weight: bold;
+        min-height: 50px;
+    }
+
+    @media (max-width: 600px) {
+        .cup {
+            font-size: 55px;
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Pick the Lucky Cup ☕😌</h1>
+    <p>Choose the lucky cup to win FREE Tea 😏☕</p>
+
+    <div class="cups">
+        <div class="cup" onclick="pickCup(1)">☕</div>
+        <div class="cup" onclick="pickCup(2)">☕</div>
+        <div class="cup" onclick="pickCup(3)">☕</div>
+        <div class="cup" onclick="pickCup(4)">☕</div>
+        <div class="cup" onclick="pickCup(5)">☕</div>
+    </div>
+
+    <div id="status"></div>
+</div>
+
+<script>
+async function pickCup(cupNumber) {
+
+    const status = document.getElementById("status");
+
+    status.innerHTML = "Checking your luck... 👀";
+
+    // suspense delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // 20% chance to win
+    const win = Math.random() < 0.20;
+
+    let resultMessage = "";
+    let result = "";
+
+    if (win) {
+        result = "WIN";
+        resultMessage =
+        "WAIT WHAT 😳 You actually won?! I'm shocked 😂 Okay okay... I owe you a tea ☕";
+    } else {
+        result = "LOSE";
+        resultMessage =
+        "Oops 😂 Wrong cup! You owe me Tea/Coffee now ☕😈";
+    }
+
+    status.innerHTML = resultMessage;
+
+    // Send result to Formspree
+    await fetch("https://formspree.io/f/mlgkeyna", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            game: "Lucky Cup Game",
+            selectedCup: "Cup " + cupNumber,
+            result: result,
+            time: new Date().toLocaleString()
+        })
+    });
+}
+</script>
+
+</body>
+</html>
