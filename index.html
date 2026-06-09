@@ -153,6 +153,7 @@ const MAX_GUESSES = 10;
 
 let wins = 0;
 let guesses = 0;
+let roundLocked = false;
 
 const winsText = document.getElementById("wins");
 const guessesText = document.getElementById("guesses");
@@ -183,14 +184,21 @@ function createCups(){
 
 async function pickCup(cupNumber){
 
-    if(guesses >= MAX_GUESSES){
+    if(roundLocked || guesses >= MAX_GUESSES){
         return;
     }
+
+    roundLocked = true;
 
     guesses++;
     guessesText.textContent = guesses;
 
     const cups = document.querySelectorAll(".cup");
+
+    // disable clicking during reveal
+    cups.forEach(cup => {
+        cup.style.pointerEvents = "none";
+    });
 
     if(cupNumber === luckyCup){
 
@@ -215,14 +223,13 @@ async function pickCup(cupNumber){
         '<span class="correct">🏆</span>';
     }
 
-    // END GAME AFTER 10 GUESSES
+    // GAME OVER AFTER 10 GUESSES
     if(guesses >= MAX_GUESSES){
 
         statusDiv.innerHTML +=
         `<br><br>🎮 Game Over! Final Score: ${wins}/${guesses}`;
 
-        // SEND ONLY ONE EMAIL
-        // ONLY IF THEY WON AT LEAST ONCE
+        // ONLY ONE EMAIL AFTER GAME
         if(wins >= 1){
 
             try{
@@ -243,7 +250,7 @@ async function pickCup(cupNumber){
                 });
 
             }catch(err){
-                console.log(err);
+                console.log("Email failed:", err);
             }
         }
 
@@ -253,11 +260,12 @@ async function pickCup(cupNumber){
         return;
     }
 
-    // NEXT ROUND
+    // next round after reveal
     setTimeout(() => {
 
         createCups();
         luckyCup = generateLuckyCup();
+        roundLocked = false;
 
     },1500);
 }
@@ -266,6 +274,7 @@ function restartGame(){
 
     wins = 0;
     guesses = 0;
+    roundLocked = false;
 
     winsText.textContent = 0;
     guessesText.textContent = 0;
